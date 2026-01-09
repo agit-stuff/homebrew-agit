@@ -1,0 +1,116 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update to (without v prefix)'
+        required: true
+        type: string
+
+jobs:
+  update:
+    name: Update Formula
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "version=${{ github.event.client_payload.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          curl -fsSL -o checksums.txt \
+            "https://github.com/agit-stuff/agit/releases/download/v${VERSION}/checksums.txt"
+          cat checksums.txt
+
+      - name: Extract hashes
+        id: hashes
+        run: |
+          echo "macos_x86_64=$(grep 'agit-macos-x86_64' checksums.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "macos_aarch64=$(grep 'agit-macos-aarch64' checksums.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "linux_x86_64=$(grep 'agit-linux-x86_64 ' checksums.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "linux_aarch64=$(grep 'agit-linux-aarch64' checksums.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Update Formula
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          cat > Formula/agit.rb << 'FORMULA'
+          # frozen_string_literal: true
+
+          # Homebrew formula for AGIT
+          #
+          # Usage:
+          #   brew tap agit-stuff/agit
+          #   brew install agit
+
+          class Agit < Formula
+            desc "AI-native Git wrapper for capturing context alongside code"
+            homepage "https://github.com/agit-stuff/agit"
+            version "VERSION_PLACEHOLDER"
+            license any_of: ["MIT", "Apache-2.0"]
+
+            on_macos do
+              on_intel do
+                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-x86_64.tar.gz"
+                sha256 "MACOS_X86_64_HASH"
+              end
+
+              on_arm do
+                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-aarch64.tar.gz"
+                sha256 "MACOS_AARCH64_HASH"
+              end
+            end
+
+            on_linux do
+              on_intel do
+                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-x86_64.tar.gz"
+                sha256 "LINUX_X86_64_HASH"
+              end
+
+              on_arm do
+                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-aarch64.tar.gz"
+                sha256 "LINUX_AARCH64_HASH"
+              end
+            end
+
+            def install
+              bin.install "agit"
+            end
+
+            test do
+              assert_match "agit #{version}", shell_output("#{bin}/agit --version")
+            end
+          end
+          FORMULA
+
+          # Replace placeholders
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" Formula/agit.rb
+          sed -i "s/MACOS_X86_64_HASH/${{ steps.hashes.outputs.macos_x86_64 }}/g" Formula/agit.rb
+          sed -i "s/MACOS_AARCH64_HASH/${{ steps.hashes.outputs.macos_aarch64 }}/g" Formula/agit.rb
+          sed -i "s/LINUX_X86_64_HASH/${{ steps.hashes.outputs.linux_x86_64 }}/g" Formula/agit.rb
+          sed -i "s/LINUX_AARCH64_HASH/${{ steps.hashes.outputs.linux_aarch64 }}/g" Formula/agit.rb
+
+          cat Formula/agit.rb
+
+      - name: Commit and push
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/agit.rb
+          git commit -m "Update agit to v${VERSION}"
+          git push
