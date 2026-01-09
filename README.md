@@ -1,6 +1,6 @@
-# Homebrew Tap for AGIT
+# Homebrew Tap for agit
 
-This is the official Homebrew tap for [AGIT](https://github.com/agit-stuff/agit), the AI-native Git wrapper.
+This is the official Homebrew tap for [agit](https://github.com/agit-stuff/agit), the AI-native Git wrapper.
 
 ## Installation
 
@@ -25,7 +25,7 @@ brew untap agit-stuff/agit
 
 ## More Information
 
-- [AGIT Repository](https://github.com/agit-stuff/agit)
+- [agit Repository](https://github.com/agit-stuff/agit)
 - [Documentation](https://github.com/agit-stuff/agit#readme)
 
 ## License
