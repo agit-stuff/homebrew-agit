@@ -45,64 +45,61 @@ jobs:
           echo "linux_aarch64=$(grep 'agit-linux-aarch64' checksums.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Update Formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          MACOS_X86_64_HASH: ${{ steps.hashes.outputs.macos_x86_64 }}
+          MACOS_AARCH64_HASH: ${{ steps.hashes.outputs.macos_aarch64 }}
+          LINUX_X86_64_HASH: ${{ steps.hashes.outputs.linux_x86_64 }}
+          LINUX_AARCH64_HASH: ${{ steps.hashes.outputs.linux_aarch64 }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          cat > Formula/agit.rb << EOF
+# frozen_string_literal: true
 
-          cat > Formula/agit.rb << 'FORMULA'
-          # frozen_string_literal: true
+# Homebrew formula for AGIT
+#
+# Usage:
+#   brew tap agit-stuff/agit
+#   brew install agit
 
-          # Homebrew formula for AGIT
-          #
-          # Usage:
-          #   brew tap agit-stuff/agit
-          #   brew install agit
+class Agit < Formula
+  desc "AI-native Git wrapper for capturing context alongside code"
+  homepage "https://github.com/agit-stuff/agit"
+  version "${VERSION}"
+  license any_of: ["MIT", "Apache-2.0"]
 
-          class Agit < Formula
-            desc "AI-native Git wrapper for capturing context alongside code"
-            homepage "https://github.com/agit-stuff/agit"
-            version "VERSION_PLACEHOLDER"
-            license any_of: ["MIT", "Apache-2.0"]
+  on_macos do
+    on_intel do
+      url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-x86_64.tar.gz"
+      sha256 "${MACOS_X86_64_HASH}"
+    end
 
-            on_macos do
-              on_intel do
-                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-x86_64.tar.gz"
-                sha256 "MACOS_X86_64_HASH"
-              end
+    on_arm do
+      url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-aarch64.tar.gz"
+      sha256 "${MACOS_AARCH64_HASH}"
+    end
+  end
 
-              on_arm do
-                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-aarch64.tar.gz"
-                sha256 "MACOS_AARCH64_HASH"
-              end
-            end
+  on_linux do
+    on_intel do
+      url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-x86_64.tar.gz"
+      sha256 "${LINUX_X86_64_HASH}"
+    end
 
-            on_linux do
-              on_intel do
-                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-x86_64.tar.gz"
-                sha256 "LINUX_X86_64_HASH"
-              end
+    on_arm do
+      url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-aarch64.tar.gz"
+      sha256 "${LINUX_AARCH64_HASH}"
+    end
+  end
 
-              on_arm do
-                url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-aarch64.tar.gz"
-                sha256 "LINUX_AARCH64_HASH"
-              end
-            end
+  def install
+    bin.install "agit"
+  end
 
-            def install
-              bin.install "agit"
-            end
-
-            test do
-              assert_match "agit #{version}", shell_output("#{bin}/agit --version")
-            end
-          end
-          FORMULA
-
-          # Replace placeholders
-          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" Formula/agit.rb
-          sed -i "s/MACOS_X86_64_HASH/${{ steps.hashes.outputs.macos_x86_64 }}/g" Formula/agit.rb
-          sed -i "s/MACOS_AARCH64_HASH/${{ steps.hashes.outputs.macos_aarch64 }}/g" Formula/agit.rb
-          sed -i "s/LINUX_X86_64_HASH/${{ steps.hashes.outputs.linux_x86_64 }}/g" Formula/agit.rb
-          sed -i "s/LINUX_AARCH64_HASH/${{ steps.hashes.outputs.linux_aarch64 }}/g" Formula/agit.rb
+  test do
+    assert_match "agit #{version}", shell_output("#{bin}/agit --version")
+  end
+end
+EOF
 
           cat Formula/agit.rb
 
