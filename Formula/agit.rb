@@ -9,18 +9,18 @@
 class Agit < Formula
   desc "AI-native Git wrapper for capturing context alongside code"
   homepage "https://github.com/agit-stuff/agit"
-  version "1.2.1"
+  version "1.3.0"
   license any_of: ["MIT", "Apache-2.0"]
 
   on_macos do
     on_intel do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-x86_64.tar.gz"
-      sha256 "93ee3643994523a9ef5842df69b2d280f3af832b12e00a41ce55633fc6ee2d3e"
+      sha256 "871054881dc6afeaa309926488066c5d77056ee93cc261a82acd96c8bed293ad"
     end
 
     on_arm do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-aarch64.tar.gz"
-      sha256 "437a63f1aaf90cb7a1157162e80412b3a552906060faa7ddb7365cdb12cb41b3"
+      sha256 "425ad33dcfcc0a83e07b89bd860706dbad61977fd8a3f99023cb287d041b578f"
     end
   end
 
@@ -32,7 +32,7 @@ class Agit < Formula
 
     on_arm do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-aarch64.tar.gz"
-      sha256 "10a867cf78bf53b736c5cca5c7374964b1deb2e6d8332664ab98cbc0725468f8"
+      sha256 "18a21f6c88580a1b0d7585cb09d24804047a3187f190960fe76123b34c60071a"
     end
   end
 
