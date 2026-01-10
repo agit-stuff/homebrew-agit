@@ -15,12 +15,12 @@ class Agit < Formula
   on_macos do
     on_intel do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-x86_64.tar.gz"
-      sha256 "e572f46245d3db69301a08a660212429d6e58e817680c52846a9c3dd617539e4"
+      sha256 "5510fd89a9a0e250beed83a7d4a12726a3e30f898d67a7da9cc0c844f5528e5b"
     end
 
     on_arm do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-macos-aarch64.tar.gz"
-      sha256 "db1c909f101a224e9e9bf352ea88eb5e599ce6331c884ba6e911db5e6b395451"
+      sha256 "9efd4af0177f67541278163e08301ec026d4bab801faab9f2a27f06f011d2297"
     end
   end
 
@@ -32,7 +32,7 @@ class Agit < Formula
 
     on_arm do
       url "https://github.com/agit-stuff/agit/releases/download/v#{version}/agit-linux-aarch64.tar.gz"
-      sha256 "4d1c21ebef3a377f02a12e023cc8e184359381d03b73f4a865cff6654ebfdfe0"
+      sha256 "92b23716bdbfccf2647f604d99fc759a267ddb7f76f611c202f2d93548081ca1"
     end
   end
 
